@@ -7,7 +7,7 @@
 namespace
 {
 	static const std::wstring s_InjectedDll = L"PSFixInjected.dll";
-	static const std::wstring s_PhotoshopPath = L"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2015.5";
+	static const std::wstring s_PhotoshopPath = L"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017";
 	static const std::wstring s_PhotoshopExe = s_PhotoshopPath + L"\\Photoshop.exe";
 
 	std::wstring GetPSFixInjectedDll()
@@ -88,11 +88,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			CloseHandle(remoteThread);
 		});
 
-		if (WaitForSingleObject(remoteThread, INFINITE) == WAIT_FAILED)
-			throw std::exception("Failed to wait for remote thread.");
-
 		if (ResumeThread(pi.hThread) == -1)
 			throw std::exception("Failed to resume remote thread.");
+
+		if (WaitForSingleObject(remoteThread, INFINITE) == WAIT_FAILED)
+			throw std::exception("Failed to wait for remote thread.");
 
 		createProcessDeleter.Cancel();
 
