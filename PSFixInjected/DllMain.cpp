@@ -2,7 +2,13 @@
 #include <Windows.h>
 #include <DbgHelp.h>
 #include <dxgi.h>
+#include <atlbase.h>
+#include <utility>
+#include "FixedDXGIFactory.h"
 #include "MemUnlocker.h"
+
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dbghelp.lib")
 
 namespace
 {
@@ -96,35 +102,20 @@ namespace
 		DoHook(srcModule, "Kernel32.dll", "LoadLibraryExW", &MyLoadLibraryExW);
 		DoHook(srcModule, "DXGI.dll", "CreateDXGIFactory", &MyCreateDXGIFactory);
 	}
-	
-	HRESULT STDMETHODCALLTYPE MyEnumAdapters(IDXGIFactory* factory, UINT Adapter, IDXGIAdapter **ppAdapter);
-
-	decltype(&MyEnumAdapters) s_OldEnumAdapters = nullptr;
-
-	HRESULT STDMETHODCALLTYPE MyEnumAdapters(IDXGIFactory* factory, UINT Adapter, IDXGIAdapter **ppAdapter)
-	{
-		if (Adapter > 0)
-			return DXGI_ERROR_NOT_FOUND;
-
-		auto r = s_OldEnumAdapters(factory, Adapter, ppAdapter);
-
-		return r;
-	}
 
 	HRESULT WINAPI MyCreateDXGIFactory(REFIID riid, void** ppFactory)
 	{
-		auto r = CreateDXGIFactory(riid, ppFactory);
+		CComPtr<IDXGIFactory> originalFactory;
+		auto r = CreateDXGIFactory(riid, reinterpret_cast<void**>(&originalFactory));
 
-		// patch EnumAdapters:
-		if (r == S_OK && ppFactory != NULL)
+		if (r == S_OK && originalFactory)
 		{
-			auto vtable = **reinterpret_cast<void****>(ppFactory);
-			if (vtable[7] != &MyEnumAdapters)
-			{
-				s_OldEnumAdapters = reinterpret_cast<decltype(&MyEnumAdapters)>(vtable[7]);
-				MemUnlocker memunlocker(vtable);
-				vtable[7] = &MyEnumAdapters;
-			}
+			auto wrapperFactory = new FixedDXGIFactory(std::move(originalFactory));
+			*ppFactory = wrapperFactory;
+		}
+		else
+		{
+			*ppFactory = nullptr;
 		}
 
 		return r;

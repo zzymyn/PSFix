@@ -88,11 +88,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			CloseHandle(remoteThread);
 		});
 
-		if (ResumeThread(pi.hThread) == -1)
-			throw std::exception("Failed to resume remote thread.");
-
 		if (WaitForSingleObject(remoteThread, INFINITE) == WAIT_FAILED)
 			throw std::exception("Failed to wait for remote thread.");
+
+		if (ResumeThread(pi.hThread) == -1)
+			throw std::exception("Failed to resume remote thread.");
 
 		createProcessDeleter.Cancel();
 
