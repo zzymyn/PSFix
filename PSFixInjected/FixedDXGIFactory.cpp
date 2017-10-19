@@ -65,10 +65,15 @@ HRESULT FixedDXGIFactory::GetParent(REFIID riid, void** ppParent)
 
 HRESULT FixedDXGIFactory::EnumAdapters(UINT Adapter, IDXGIAdapter** ppAdapter)
 {
+	// This is where the magic happens.
+	// Photoshop will crash on some setups if you have more than one graphics card.
+	// We can fix this by intercepting calls to DXGIFactory::EnumAdapters and showing
+	// only one graphics card to Photoshop.exe (and Sniffer.exe).
+
 	if (Adapter > 0)
 	{
-		// Ignore anything above index 0:
-		ppAdapter = nullptr;
+		if (ppAdapter)
+			ppAdapter = nullptr;
 		return DXGI_ERROR_NOT_FOUND;
 	}
 	else

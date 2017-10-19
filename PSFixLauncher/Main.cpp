@@ -1,48 +1,85 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <string>
+#include <memory>
 #include <exception>
 #include "ScopeExit.h"
+#include "Utils.h"
 
 namespace
 {
-	static const std::wstring s_InjectedDll = L"PSFixInjected.dll";
-	static const std::wstring s_PhotoshopPath = L"C:\\Program Files\\Adobe\\Adobe Photoshop CC 2017";
-	static const std::wstring s_PhotoshopExe = s_PhotoshopPath + L"\\Photoshop.exe";
+	static const auto s_InjectedDll{ L"PSFixInjected.dll" };
+	static const auto s_PhotoshopExe{ L"\\Photoshop.exe" };
+	static const auto s_PhotoshopRegPath{ L"SOFTWARE\\Adobe\\Photoshop" };
 
-	std::wstring GetPSFixInjectedDll()
+	template <typename F>
+	void EnumRegistryKeys(HKEY key, F&& f)
 	{
-		wchar_t* wpgmptr{ nullptr };
+		const DWORD buffSize{ 1024 };
+		const auto buff = std::make_unique<wchar_t[]>(buffSize);
 
-		if (_get_wpgmptr(&wpgmptr) != 0)
-			throw std::exception("Failed to get injected DLL path.");
-
-		std::wstring r{ wpgmptr };
-
-		const auto lastSlash = r.find_last_of(L'\\');
-
-		if (lastSlash == std::wstring::npos)
-			throw std::exception("Failed to get injected DLL path.");
-
-		r.resize(lastSlash + 1);
-		r += s_InjectedDll;
-
-		return r;
+		for (DWORD index = 0; ; ++index)
+		{
+			const auto enumResult = RegEnumKeyW(key, index, buff.get(), buffSize);
+			if (enumResult == ERROR_SUCCESS)
+			{
+				f(std::wstring{ buff.get() });
+			}
+			else if (enumResult == ERROR_NO_MORE_ITEMS)
+			{
+				break;
+			}
+			else
+			{
+				throw std::exception("Error enumerating registry keys.");
+			}
+		}
 	}
 
-	FARPROC GetProcAddress(LPCSTR moduleName, LPCSTR procName)
+	std::wstring GetRegistryString(HKEY key, const std::wstring& path)
 	{
-		const auto moduleHandle = GetModuleHandleA(moduleName);
+		const DWORD buffSize{ 1024 };
+		const auto buff = std::make_unique<char[]>(buffSize);
+		auto outBuffSize = buffSize;
 
-		if (moduleHandle == 0)
-			throw std::exception("Failed to get module handle.");
+		if (RegGetValueW(key, path.c_str(), NULL, RRF_RT_REG_SZ, NULL, buff.get(), &outBuffSize) != ERROR_SUCCESS)
+		{
+			throw std::exception("Failed to get registry value.");
+		}
 
-		const auto procAddress = GetProcAddress(moduleHandle, procName);
+		return std::wstring{ reinterpret_cast<const wchar_t*>(buff.get()) };
+	}
 
-		if (procAddress == 0)
-			throw std::exception("Failed to get LoadLibraryW address.");
+	std::wstring FindPhotoshopPath()
+	{
+		HKEY photoshopKey{};
 
-		return procAddress;
+		if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, s_PhotoshopRegPath, 0, KEY_READ, &photoshopKey) != ERROR_SUCCESS)
+		{
+			throw std::exception("Couldn't find Photoshop path in registry.");
+		}
+
+		const auto photoshopKeyDeleter = OnScopeExit([=]()
+		{
+			RegCloseKey(photoshopKey);
+		});
+
+		std::wstring highestVersion;
+
+		EnumRegistryKeys(photoshopKey, [&](const auto& subkey)
+		{
+			if (subkey >= highestVersion)
+			{
+				highestVersion = subkey;
+			}
+		});
+
+		if (highestVersion.empty())
+		{
+			throw std::exception("Couldn't find Photoshop path in registry.");
+		}
+
+		return GetRegistryString(photoshopKey, highestVersion + L"\\ApplicationPath");
 	}
 }
 
@@ -50,14 +87,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 {
 	try
 	{
-		const auto injectDllFullPath = GetPSFixInjectedDll();
-		const auto injectDllFullPathSize = sizeof(wchar_t) * (injectDllFullPath.size() + 1);
-		const auto loadLibraryWAddress = GetProcAddress("Kernel32", "LoadLibraryW");
+		const auto photoshopPath = FindPhotoshopPath();
+		const auto photoshopExe = photoshopPath + s_PhotoshopExe;
+		const auto injectDllFullPath = Utils::GetSiblingPath(s_InjectedDll);
 
 		STARTUPINFO si{};
 		PROCESS_INFORMATION pi{};
 
-		if (CreateProcessW(s_PhotoshopExe.c_str(), lpCmdLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, s_PhotoshopPath.c_str(), &si, &pi) == 0)
+		if (CreateProcessW(photoshopExe.c_str(), lpCmdLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, photoshopPath.c_str(), &si, &pi) == 0)
 			throw std::exception("Failed to open Photoshop.exe");
 
 		auto createProcessDeleter = OnScopeExit([=]()
@@ -65,31 +102,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			TerminateProcess(pi.hProcess, 1);
 		});
 
-		const auto remoteMemory = VirtualAllocEx(pi.hProcess, NULL, injectDllFullPathSize, MEM_COMMIT, PAGE_READWRITE);
-
-		if (!remoteMemory)
-			throw std::exception("Failed to alloc remote memory.");
-
-		const auto remoteMemoryDeleter = OnScopeExit([=]()
-		{
-			VirtualFreeEx(pi.hProcess, remoteMemory, injectDllFullPathSize, 0);
-		});
-
-		if (WriteProcessMemory(pi.hProcess, remoteMemory, injectDllFullPath.c_str(), injectDllFullPathSize, NULL) == 0)
-			throw std::exception("Failed to write process memory.");
-
-		const auto remoteThread = CreateRemoteThread(pi.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)loadLibraryWAddress, remoteMemory, 0, NULL);
-
-		if (remoteThread == 0)
-			throw std::exception("Failed to create remote thread.");
-
-		const auto remoteThreadDeleter = OnScopeExit([=]()
-		{
-			CloseHandle(remoteThread);
-		});
-
-		if (WaitForSingleObject(remoteThread, INFINITE) == WAIT_FAILED)
-			throw std::exception("Failed to wait for remote thread.");
+		Utils::InjectDll(pi.hProcess, injectDllFullPath);
 
 		if (ResumeThread(pi.hThread) == -1)
 			throw std::exception("Failed to resume remote thread.");

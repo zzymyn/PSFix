@@ -7,8 +7,7 @@ class ScopeExit
 {
 public:
 	ScopeExit(Func&& func)
-		: m_Func(std::forward<Func>(func))
-		, m_Cancelled(false)
+		: m_Func{ std::forward<Func>(func) }
 	{
 	}
 
@@ -25,7 +24,7 @@ public:
 
 private:
 	Func m_Func;
-	bool m_Cancelled;
+	bool m_Cancelled{ false };
 };
 
 template <typename Func>
