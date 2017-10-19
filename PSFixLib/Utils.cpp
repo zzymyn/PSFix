@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include "ScopeExit.h"
+#include <memory>
 
 namespace
 {
@@ -23,22 +24,26 @@ namespace Utils
 {
 	HMODULE GetCurrentModule()
 	{
-		HMODULE r{ NULL };
-		GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)GetCurrentModule, &r);
+		HMODULE r;
+		if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)GetCurrentModule, &r))
+			return NULL;
 		return r;
 	}
 
 	std::wstring GetCurrentModulePath()
 	{
+		const DWORD buffSize{ 1024 };
+		const auto buff = std::make_unique<wchar_t[]>(buffSize);
+
 		auto currentModule = GetCurrentModule();
 
-		wchar_t buff[1025]{};
-		if (GetModuleFileNameW(currentModule, buff, 1024) == 0)
+		auto r = GetModuleFileNameW(currentModule, buff.get(), buffSize);
+		if (r <= 0 || r >= buffSize)
 		{
 			throw std::exception("Failed to get current module path.");
 		}
 
-		return std::wstring{ buff };
+		return std::wstring{ buff.get() };
 	}
 
 	std::wstring GetSiblingPath(const std::wstring& name)

@@ -4,9 +4,6 @@
 class MemUnlocker
 {
 public:
-	MemUnlocker(const MemUnlocker&) = delete;
-	MemUnlocker(MemUnlocker&&) = delete;
-
 	MemUnlocker(void* memory)
 	{
 		VirtualQuery(memory, &m_Mbi, sizeof(MEMORY_BASIC_INFORMATION));
@@ -21,7 +18,12 @@ public:
 		VirtualProtect(m_Mbi.BaseAddress, m_Mbi.RegionSize, m_Mbi.Protect, &dwOldProtect);
 	}
 
+	MemUnlocker(const MemUnlocker&) = delete;
+
+	MemUnlocker(MemUnlocker&&) = delete;
+
 	MemUnlocker& operator=(const MemUnlocker&) = delete;
+
 	MemUnlocker& operator=(MemUnlocker&&) = delete;
 
 private:

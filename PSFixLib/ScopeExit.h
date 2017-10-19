@@ -11,6 +11,19 @@ public:
 	{
 	}
 
+	ScopeExit(const ScopeExit&) = delete;
+
+	ScopeExit(ScopeExit&& o)
+		: m_Func(std::move(o.m_Func))
+		, m_Cancelled(o.m_Cancelled)
+	{
+		o.m_Cancelled = true;
+	}
+
+	ScopeExit& operator=(const ScopeExit&) = delete;
+
+	ScopeExit& operator=(ScopeExit&&) = delete;
+
 	~ScopeExit()
 	{
 		if (!m_Cancelled)
