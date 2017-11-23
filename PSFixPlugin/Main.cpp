@@ -1,5 +1,6 @@
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include "PIGeneral.h"
+#include <cstdint>
 
 BOOLEAN WINAPI DllMain(IN HINSTANCE hDllHandle, IN DWORD nReason, IN LPVOID Reserved)
 {
@@ -18,7 +19,7 @@ BOOLEAN WINAPI DllMain(IN HINSTANCE hDllHandle, IN DWORD nReason, IN LPVOID Rese
 	return bSuccess;
 }
 
-extern "C" __declspec(dllexport) SPAPI SPErr AutoPluginMain(const char* caller, const char* selector, void* message)
+extern "C" __declspec(dllexport) std::int32_t PluginMain(const char* caller, const char* selector, void* message)
 {
-	return kSPUnimplementedError;
+	return 0;
 }

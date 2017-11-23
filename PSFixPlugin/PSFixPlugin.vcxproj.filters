@@ -12,7 +12,4 @@
   <ItemGroup>
     <CustomBuild Include="PSFix.r" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="PSFix.pipl" />
-  </ItemGroup>
 </Project>
