@@ -1,3 +1,7 @@
+// By default, this file not included in the build.
+// If you reenable it, copy the resulting pipl file to PSFix.rc.
+// This is so the plugin can still be built even without installing the Photoshop SDK.
+
 #include "PIGeneral.h"
 
 resource 'PiPL' (16000, "PSFix", purgeable)
