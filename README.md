@@ -18,7 +18,7 @@ Simply copy `PSFix.8bp` into your Photoshop plugins folder (`C:\Program Files\Ad
 
 ### Launcher
 
-Run `PSFixLauncher.exe` to launch Photoshop with the fix injected. Note that `PSFixLauncher.exe` still uses the `PSFix.8bp` file so keep that next to `PSFixLauncher.exe`.
+Run `PSFixLauncher.exe` to launch Photoshop with the fix. You'll have to use the launcher every time you want to start Photoshop, if you don't want to have to do that, use the plugin instead. Note that `PSFixLauncher.exe` still uses the `PSFix.8bp` file so keep that next to `PSFixLauncher.exe`.
 
 ## Technical Details
 
