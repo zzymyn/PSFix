@@ -5,11 +5,9 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSFixLauncher", "PSFixLauncher\PSFixLauncher.vcxproj", "{8C7DCAE9-5840-4BCA-A23A-FC6F1B4F64F5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSFixInjected", "PSFixInjected\PSFixInjected.vcxproj", "{99C55D80-91A9-4E41-AD09-D66892396F73}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSFixLib", "PSFixLib\PSFixLib.vcxproj", "{9F34D4CF-1F8B-49DD-86FC-60EB36C72146}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSFixPlugin", "PSFixPlugin\PSFixPlugin.vcxproj", "{A88B5CD2-B30E-4490-9A8E-1D877DB46A47}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PSFix", "PSFix\PSFix.vcxproj", "{99C55D80-91A9-4E41-AD09-D66892396F73}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,18 +19,14 @@ Global
 		{8C7DCAE9-5840-4BCA-A23A-FC6F1B4F64F5}.Debug|x64.Build.0 = Debug|x64
 		{8C7DCAE9-5840-4BCA-A23A-FC6F1B4F64F5}.Release|x64.ActiveCfg = Release|x64
 		{8C7DCAE9-5840-4BCA-A23A-FC6F1B4F64F5}.Release|x64.Build.0 = Release|x64
-		{99C55D80-91A9-4E41-AD09-D66892396F73}.Debug|x64.ActiveCfg = Debug|x64
-		{99C55D80-91A9-4E41-AD09-D66892396F73}.Debug|x64.Build.0 = Debug|x64
-		{99C55D80-91A9-4E41-AD09-D66892396F73}.Release|x64.ActiveCfg = Release|x64
-		{99C55D80-91A9-4E41-AD09-D66892396F73}.Release|x64.Build.0 = Release|x64
 		{9F34D4CF-1F8B-49DD-86FC-60EB36C72146}.Debug|x64.ActiveCfg = Debug|x64
 		{9F34D4CF-1F8B-49DD-86FC-60EB36C72146}.Debug|x64.Build.0 = Debug|x64
 		{9F34D4CF-1F8B-49DD-86FC-60EB36C72146}.Release|x64.ActiveCfg = Release|x64
 		{9F34D4CF-1F8B-49DD-86FC-60EB36C72146}.Release|x64.Build.0 = Release|x64
-		{A88B5CD2-B30E-4490-9A8E-1D877DB46A47}.Debug|x64.ActiveCfg = Debug|x64
-		{A88B5CD2-B30E-4490-9A8E-1D877DB46A47}.Debug|x64.Build.0 = Debug|x64
-		{A88B5CD2-B30E-4490-9A8E-1D877DB46A47}.Release|x64.ActiveCfg = Release|x64
-		{A88B5CD2-B30E-4490-9A8E-1D877DB46A47}.Release|x64.Build.0 = Release|x64
+		{99C55D80-91A9-4E41-AD09-D66892396F73}.Debug|x64.ActiveCfg = Debug|x64
+		{99C55D80-91A9-4E41-AD09-D66892396F73}.Debug|x64.Build.0 = Debug|x64
+		{99C55D80-91A9-4E41-AD09-D66892396F73}.Release|x64.ActiveCfg = Release|x64
+		{99C55D80-91A9-4E41-AD09-D66892396F73}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

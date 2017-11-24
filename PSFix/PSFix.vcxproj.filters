@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="FixedDXGIFactory.cpp" />
+    <ClCompile Include="PluginMain.cpp">
+      <Filter>PS Plugin</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FixedDXGIFactory.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="PS Plugin">
+      <UniqueIdentifier>{4ad45c43-61f1-4215-be1a-15987f7d55cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Plugin.rc">
+      <Filter>PS Plugin</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Plugin.rr">
+      <Filter>PS Plugin</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

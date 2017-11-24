@@ -14,6 +14,7 @@
     <ProjectGuid>{99C55D80-91A9-4E41-AD09-D66892396F73}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PSFixInjected</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -41,9 +42,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.8bp</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.8bp</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -86,6 +89,7 @@
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="FixedDXGIFactory.cpp" />
+    <ClCompile Include="PluginMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PSFixLib\PSFixLib.vcxproj">
@@ -94,6 +98,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FixedDXGIFactory.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Plugin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Plugin.rr">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cl /I$(SolutionDir)pluginsdk\PhotoshopAPI\Photoshop /I$(SolutionDir)pluginsdk\PhotoshopAPI\PICA_SP /EP /DWIN32=1 /Tc"%(FullPath)" &gt; "$(IntDir)%(Filename).rr"
+$(SolutionDir)pluginsdk\samplecode\resources\cnvtpipl.exe "$(IntDir)%(Filename).rr" "$(IntDir)%(Filename).pipl"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename).pipl;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cl /I$(SolutionDir)pluginsdk\PhotoshopAPI\Photoshop /I$(SolutionDir)pluginsdk\PhotoshopAPI\PICA_SP /EP /DWIN32=1 /Tc"%(FullPath)" &gt; "$(IntDir)%(Filename).rr"
+$(SolutionDir)pluginsdk\samplecode\resources\cnvtpipl.exe "$(IntDir)%(Filename).rr" "$(IntDir)%(Filename).pipl"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename).pipl;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

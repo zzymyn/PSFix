@@ -4,5 +4,5 @@
 
 extern "C" __declspec(dllexport) std::int32_t PluginMain(const char* caller, const char* selector, void* message)
 {
-	return 0;
+	return 1;
 }

@@ -8,7 +8,7 @@
 
 namespace
 {
-	static const auto s_InjectedDll{ L"PSFixInjected.dll" };
+	static const auto s_InjectedDll{ L"PSFix.8bp" };
 	static const auto s_PhotoshopExe{ L"\\Photoshop.exe" };
 	static const auto s_PhotoshopRegPath{ L"SOFTWARE\\Adobe\\Photoshop" };
 
