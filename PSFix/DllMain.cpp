@@ -116,36 +116,51 @@ namespace
 
 	void HookAll(HMODULE srcModule);
 
-	// Hook all LoadLibrary variants so we infect every DLL loaded:
-	HMODULE WINAPI MyLoadLibraryA(LPCSTR lpLibFileName)
+	bool IsPSFix(LPCSTR lpLibFileName)
 	{
-		auto r = LoadLibraryA(lpLibFileName);
+		return StrStrIA(lpLibFileName, "PSFix.8bp") != NULL;
+	}
+
+	bool IsPSFix(LPCWSTR lpLibFileName)
+	{
+		return StrStrIW(lpLibFileName, L"PSFix.8bp") != NULL;
+	}
+
+	// Hook all LoadLibrary variants so we inject into every DLL loaded,
+	// but we also check to make sure we're not loading "PSFix.8bp" again.
+	// This can happen if the launcher is used and the plugin is installed
+	// at the same time.
+	template <typename Func, typename StrT, typename... Args>
+	HMODULE WINAPI MyLoadLibrary(Func&& func, StrT lpLibFileName, Args... args)
+	{
+		if (IsPSFix(lpLibFileName))
+			return Utils::AddRefCurrentModule();
+		auto r = func(lpLibFileName, args...);
 		HookAll(r);
 		return r;
 	}
 
-	HMODULE WINAPI MyLoadLibraryW(LPWSTR lpLibFileName)
+	HMODULE WINAPI MyLoadLibraryA(LPCSTR lpLibFileName)
 	{
-		auto r = LoadLibraryW(lpLibFileName);
-		HookAll(r);
-		return r;
+		return MyLoadLibrary(LoadLibraryA, lpLibFileName);
+	}
+
+	HMODULE WINAPI MyLoadLibraryW(LPCWSTR lpLibFileName)
+	{
+		return MyLoadLibrary(LoadLibraryW, lpLibFileName);
 	}
 
 	HMODULE WINAPI MyLoadLibraryExA(LPCSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 	{
-		auto r = LoadLibraryExA(lpLibFileName, hFile, dwFlags);
-		HookAll(r);
-		return r;
+		return MyLoadLibrary(LoadLibraryExA, lpLibFileName, hFile, dwFlags);
 	}
 
 	HMODULE WINAPI MyLoadLibraryExW(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 	{
-		auto r = LoadLibraryExW(lpLibFileName, hFile, dwFlags);
-		HookAll(r);
-		return r;
+		return MyLoadLibrary(LoadLibraryExW, lpLibFileName, hFile, dwFlags);
 	}
 
-	// Intercept CreateProcess calls to also infect subprocesses:
+	// Intercept CreateProcess calls to also inject into subprocesses:
 	// However, at the moment, we only intercept calls to "sniffer.exe".
 	// sniffer.exe is the tool that determines whether OpenCL is supported,
 	// but it will also crash on ATI cards if you also have integrated graphics enabled.
@@ -213,6 +228,10 @@ namespace
 	void HookAll(HMODULE srcModule)
 	{
 		if (srcModule == NULL)
+			return;
+
+		// never hook ourselves:
+		if (srcModule == Utils::GetCurrentModule())
 			return;
 
 		DoHook(srcModule, "Kernel32.dll", "LoadLibraryA", &MyLoadLibraryA);

@@ -7,6 +7,7 @@
 namespace Utils
 {
 	HMODULE GetCurrentModule();
+	HMODULE AddRefCurrentModule();
 
 	std::wstring GetCurrentModulePath();
 

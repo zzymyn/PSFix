@@ -25,7 +25,15 @@ namespace Utils
 	HMODULE GetCurrentModule()
 	{
 		HMODULE r;
-		if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)GetCurrentModule, &r))
+		if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCTSTR)GetCurrentModule, &r))
+			return NULL;
+		return r;
+	}
+
+	HMODULE AddRefCurrentModule()
+	{
+		HMODULE r;
+		if (!GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)AddRefCurrentModule, &r))
 			return NULL;
 		return r;
 	}
