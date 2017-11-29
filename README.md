@@ -2,7 +2,7 @@
 
 Download: https://github.com/zzymyn/PSFix/releases/download/1.0/PSFix.zip
 
-Stops Photoshop crashing when you have more than one GPU with GPU acceleration.
+Stops Photoshop crashing when you have more than one graphics card or monitor with GPU acceleration active.
 
 For example, if you have an AMD card and Intel HD integrated graphics card enabled at the same time, Photoshop will crash if you attempt to turn on GPU acceleration. This plugin/launcher fixes that my hooking Photoshop and hiding the Intel HD card from it.
 
